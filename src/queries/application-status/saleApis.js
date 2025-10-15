@@ -14,7 +14,6 @@ export const useAdmissionTypes = () => {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
-        console.log("Admission types data:", data);
         if (Array.isArray(data)) {
           const options = data.map((item) => item.name);
           const idMap = {};
@@ -53,9 +52,8 @@ export const useStudentTypes = () => {
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
-          const data = await response.json();
-          console.log("Student types data:", data);
-          if (Array.isArray(data)) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
             const options = data.map((item) => item.name);
             const idMap = {};
             data.forEach((item) => {
@@ -93,9 +91,8 @@ export const useStudentTypes = () => {
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
-          const data = await response.json();
-          console.log("Campuses data:", data);
-          if (Array.isArray(data)) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
             const options = data.map((item) => item.name);
             const idMap = {};
             data.forEach((item) => {
@@ -133,9 +130,8 @@ export const useStudentTypes = () => {
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
-          const data = await response.json();
-          console.log("Courses data:", data);
-          if (Array.isArray(data)) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
             const options = data.map((item) => item.name);
             const idMap = {};
             data.forEach((item) => {
@@ -174,9 +170,8 @@ export const useStates = () => {
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
-          const data = await response.json();
-          console.log("States data:", data);
-          if (Array.isArray(data)) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
             const options = data.map((item) => item.name);
             const idMap = {};
             data.forEach((item) => {
@@ -221,9 +216,8 @@ export const useStates = () => {
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
-          const data = await response.json();
-          console.log("Districts data:", data);
-          if (Array.isArray(data)) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
             const options = data.map((item) => item.name);
             const idMap = {};
             data.forEach((item) => {

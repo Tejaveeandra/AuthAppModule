@@ -1,372 +1,46 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { getApplicationStatus } from "../../../../queries/application-status/apis";
+import React, { useState, useEffect } from "react";
 import styles from "./ApplicationStatus.module.css";
-import searchIcon from "../../../../assets/application-status/Group.svg";
-import filterIcon from "../../../../assets/application-status/Filter.svg";
-import appliedFilterIcon from "../../../../assets/application-status/Vector.svg";
-import exportIcon from "../../../../assets/application-status/Arrow up.svg";
-import FilterPanel from "../FilterComponent/FilterPanel";
-import FileExport from "../ExportComponent/FileExport";
-import ApplicationStatusTable from "../ApplicationStatusTable/ApplicationStatusTable";
-import SearchCards from "../SearchComponent/SearchCards";
+import ApplicationStatusHeader from "./components/ApplicationStatusHeader";
+import ApplicationStatusContent from "./components/ApplicationStatusContent";
+import { useApplicationData } from "./hooks/useApplicationData";
+import { useApplicationFilters } from "./hooks/useApplicationFilters";
+import { useApplicationSearch } from "./hooks/useApplicationSearch";
+import { useApplicationNavigation } from "./hooks/useApplicationNavigation";
+import { useApplicationUI } from "./hooks/useApplicationUI";
  
 const ApplicationStatus = () => {
-  const [search, setSearch] = useState("");
-  const [showFilter, setShowFilter] = useState(false);
-  const [showExport, setShowExport] = useState(false);
-  const [isFilterApplied, setIsFilterApplied] = useState(false);
-  const [data, setData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [pageIndex, setPageIndex] = useState(0);
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("zone");
-  const [selectedCampus, setSelectedCampus] = useState("All Campuses"); // Start with "All Campuses" to show all data
-  const [studentCategory, setStudentCategory] = useState({
-    all: true,
-    sold: false,
-    confirmed: false,
-    unsold: false,
-    withPro: false,
-    damaged: false,
-  });
+  // Custom hooks for different concerns
+  const {
+    showFilter,
+    setShowFilter,
+    showExport,
+    setShowExport,
+    activeTab,
+    setActiveTab,
+    selectedCampus,
+    setSelectedCampus,
+    pageIndex,
+    setPageIndex
+  } = useApplicationUI();
+  
+  const { data, loading, error } = useApplicationData(selectedCampus);
+  const { search, handleSearchChange } = useApplicationSearch();
+  const { handleCardClick } = useApplicationNavigation();
+  
+  const {
+    studentCategory,
+    setStudentCategory,
+    isFilterApplied,
+    filteredData
+  } = useApplicationFilters(data, search, selectedCampus);
  
-  // Baseline refs to detect if user has applied any filter changes
-  const initialCampusRef = useRef("All Campuses"); // Start with "All Campuses"
-  const initialStudentCategoryRef = useRef({
-    all: true,
-    sold: false,
-    confirmed: false,
-    unsold: false,
-    withPro: false,
-    damaged: false,
-  });
- 
-  // Map backend status to frontend display status
-  const reverseStatusMap = {
-    damaged: "DAMAGED",
-    withpro: "AVAILABLE",
-    "not confirmed": "UNSOLD",
-    confirmed: "CONFIRMED",
-    "with pro": "AVAILABLE",
-    with_pro: "AVAILABLE",
-    available: "AVAILABLE",
-    unsold: "UNSOLD",
-    "not sold": "UNSOLD",
-    notsold: "UNSOLD",
-    "un sold": "UNSOLD",
-    approved: "CONFIRMED",
-    broken: "DAMAGED",
-    "": "UNKNOWN",
-  };
- 
-  // Normalize API response fields
-  const normalizeApiResponse = (data) => {
-    const getFullName = (emp) =>
-      emp && emp.first_name && emp.last_name
-        ? `${emp.first_name} ${emp.last_name}`
-        : emp?.name || "";
-    return data.map((item) => ({
-      ...item,
-      applicationNo: item.num || item.applicationNo || item.application_no || "",
-      zone: item.zone_name || item.zonal_name || item.zone || item.zoneName || "",
-      zoneEmpId: item.zoneEmpId || item.zone_emp_id || null,
-      campus: item.cmps_name || item.campus || item.campusName || "",
-      campusId: item.cmps_id || item.campusId || item.campus_id || null,
-      pro:
-        item.pro_name ||
-        item.pro ||
-        item.proName ||
-        getFullName(item.pro_employee) ||
-        "",
-      proId: item.proId || item.pro_id || null,
-      dgm:
-        item.dgm_name ||
-        item.dgm ||
-        item.dgmName ||
-        getFullName(item.dgm_employee) ||
-        "",
-      dgmEmpId: item.dgmEmpId || item.dgm_emp_id || null,
-      status: item.status || "",
-      statusId: item.statusId || item.status_id || null,
-      reason: item.reason || "",
-      isSelected: !!item.isSelected,
-    }));
-  };
- 
+  // Handle page index changes when filtered data changes
   useEffect(() => {
-    const fetchData = async () => {
-      // Skip fetching if selectedCampus is invalid
-      if (!selectedCampus) {
-        setData([]);
-        setError("Please select a valid campus to view application status.");
-        setLoading(false);
-        return;
-      }
- 
-      setLoading(true);
-      setError(null);
-      try {
-        // Since we're using employee-based API, we don't need campus ID
-        // The employee-based API will return applications for the logged-in employee regardless of campus
-        const empId = localStorage.getItem('empId');
-        console.log(`🔍 Calling getApplicationStatus with empId: ${empId} (no campus ID needed for employee-based API)`);
-        const result = await getApplicationStatus(null, empId); // Pass null for campusId since employee-based API doesn't need it
-        console.log("🔍 API Result:", result);
-        console.log("🔍 API Result type:", typeof result);
-        console.log("🔍 API Result length:", Array.isArray(result) ? result.length : 'Not an array');
-       
-        // Handle nested API response structure
-        let actualData = result;
-        if (Array.isArray(result) && result.length === 2 && result[0] === "java.util.ArrayList") {
-          actualData = result[1];
-        } else if (Array.isArray(result) && result.length > 0 && typeof result[0] === "string") {
-          // If first element is a string, the actual data is likely in the second element
-          actualData = result[1] || result;
-        }
-       
-        console.log("🔍 Actual Data:", actualData);
-        console.log("🔍 First few items:", actualData.slice(0, 3));
-        const uniqueStatuses = [...new Set(actualData.map((item) => item.status ?? "Unknown"))];
-        console.log("🔍 Unique Status Values:", uniqueStatuses);
-        const normalized = normalizeApiResponse(Array.isArray(actualData) ? actualData : []);
-        console.log("🔍 Normalized data sample:", normalized.slice(0, 3));
-        console.log("🔍 Normalized data length:", normalized.length);
-        
-        if (normalized.length === 0) {
-          console.warn("🔍 No data found! This might be because:");
-          console.warn("1. The employee has no applications assigned");
-          console.warn("2. The new API endpoint is not working");
-          console.warn("3. The data format has changed");
-        }
-        
-        console.log("🔍 Setting data to state...");
-        setData(normalized);
-        console.log("🔍 Data set successfully");
-      } catch (err) {
-        console.error("🔍 Error fetching application status:", err);
-        console.error("🔍 Error details:", {
-          message: err.message,
-          status: err.response?.status,
-          data: err.response?.data
-        });
-        setError(err.message || "Failed to fetch data. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [selectedCampus]);
- 
-  const filteredDataMemo = useMemo(() => {
-    console.log("Starting filtering with data:", data.length, "items");
-    console.log("selectedCampus:", selectedCampus, "type:", typeof selectedCampus);
-    console.log("studentCategory:", studentCategory);
-   
-    let filtered = data;
- 
-    filtered = filtered.map((item) => {
-      const backendStatus = (item.status ?? "").toLowerCase().trim();
-      let displayStatus = reverseStatusMap[backendStatus] || backendStatus.toUpperCase() || "UNKNOWN";
-      switch (backendStatus) {
-        case "not confirmed":
-          displayStatus = "Sold";
-          break;
-        case "available":
-        case "withpro":
-        case "with pro":
-        case "with_pro":
-          displayStatus = "With PRO";
-          break;
-        case "confirmed":
-        case "approved":
-          displayStatus = "Confirmed";
-          break;
-        case "unsold":
-        case "not sold":
-        case "notsold":
-        case "un sold":
-          displayStatus = "Unsold";
-          break;
-        case "damaged":
-        case "broken":
-          displayStatus = "Damaged";
-          break;
-        default:
-          displayStatus = backendStatus.charAt(0).toUpperCase() + backendStatus.slice(1).toLowerCase();
-      }
-      return { ...item, displayStatus };
-    });
- 
-    console.log("After status mapping:", filtered.length, "items");
- 
-    if (search) {
-      filtered = filtered.filter((item) =>
-        String(item.applicationNo ?? "")
-          .toLowerCase()
-          .includes(String(search).toLowerCase())
-      );
-      console.log("After search filter:", filtered.length, "items");
-    }
- 
-    // Note: Campus filtering is now handled by the employee-based API
-    // The API returns only applications assigned to the logged-in employee
-    console.log("🔍 Using employee-based API - campus filtering handled by backend");
-    console.log("🔍 Showing applications for employee ID:", localStorage.getItem('empId'));
- 
-    const isAllSelected =
-      studentCategory.all &&
-      !studentCategory.sold &&
-      !studentCategory.confirmed &&
-      !studentCategory.unsold &&
-      !studentCategory.withPro &&
-      !studentCategory.damaged;
-   
-    console.log("isAllSelected:", isAllSelected);
-   
-    if (!isAllSelected) {
-      console.log("Applying category filter");
-      filtered = filtered.filter((item) => {
-        const status = item.displayStatus;
-        const matches = (
-          studentCategory.all ||
-          (studentCategory.sold && status === "Sold") ||
-          (studentCategory.confirmed && status === "Confirmed") ||
-          (studentCategory.unsold && status === "Unsold") ||
-          (studentCategory.withPro && status === "With PRO") ||
-          (studentCategory.damaged && status === "Damaged")
-        );
-        if (!matches && filtered.length < 10) { // Only log first few for debugging
-          console.log("Category mismatch - status:", status, "matches:", matches);
-        }
-        return matches;
-      });
-      console.log("After category filter:", filtered.length, "items");
-    }
- 
-    console.log("Final filteredData:", filtered.length, "items");
-    return filtered;
-  }, [data, search, selectedCampus, studentCategory]);
- 
-  useEffect(() => {
-    setFilteredData(filteredDataMemo);
-    if (filteredDataMemo.length <= pageIndex * 10) {
+    if (filteredData.length <= pageIndex * 10) {
       setPageIndex(0);
     }
-  }, [filteredDataMemo]);
+  }, [filteredData, pageIndex, setPageIndex]);
  
-  useEffect(() => {
-    const isCategoryChanged = (a, b) =>
-      a.all !== b.all ||
-      a.sold !== b.sold ||
-      a.confirmed !== b.confirmed ||
-      a.unsold !== b.unsold ||
-      a.withPro !== b.withPro ||
-      a.damaged !== b.damaged;
- 
-    const applied =
-      selectedCampus !== initialCampusRef.current ||
-      isCategoryChanged(studentCategory, initialStudentCategoryRef.current);
- 
-    setIsFilterApplied(applied);
-  }, [selectedCampus, studentCategory]);
- 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      const exportPanel = document.querySelector(`[class*="exportContainer"]`);
-      const filterPanel = document.querySelector(`[class*="filter_panel"]`);
-      const filterButton = event.target.closest(
-        `.${styles["application-status__filter-btn"]}`
-      );
-      const exportButton = event.target.closest(
-        `.${styles["application-status__export-btn"]}`
-      );
-      if (
-        showExport &&
-        exportPanel &&
-        !exportPanel.contains(event.target) &&
-        !exportButton
-      ) {
-        setShowExport(false);
-      }
-      if (
-        showFilter &&
-        filterPanel &&
-        !filterPanel.contains(event.target) &&
-        !filterButton
-      ) {
-        setShowFilter(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showExport, showFilter]);
- 
-  const handleCardClick = (item) => {
-    const applicationNo = item?.applicationNo;
-    const displayStatus = item?.displayStatus;
-   
-    // Debug logging for the item data
-    console.log("🖱️ Card clicked - Item data:", {
-      applicationNo,
-      displayStatus,
-      campus: item.campus,
-      cmps_name: item.cmps_name,
-      campusName: item.campusName,
-      zone: item.zone,
-      zonal_name: item.zonal_name,
-      zoneName: item.zoneName,
-      fullItem: item
-    });
-   
-    if (applicationNo) {
-      // New navigation logic: If status is "Sold" (blue) -> confirmation, otherwise -> sale
-      let route;
-      if (displayStatus === "Damaged") {
-        route = "damaged";
-      } else if (displayStatus === "Sold") {
-        route = "confirmation";
-      } else {
-        route = "sale";
-      }
-      const initialValues = {
-        applicationNo: item.applicationNo || "",
-        zoneName: item.zonal_name || item.zone || item.zoneName || "",
-        zone: item.zonal_name || item.zone || item.zoneName || "",
-        zoneEmpId: item.zoneEmpId || item.zone_emp_id || "",
-        campusName: item.cmps_name || item.campus || item.campusName || "",
-        campus: item.cmps_name || item.campus || item.campusName || "",
-        campusId: item.campusId || item.campus_id || "",
-        proName:
-          item.pro ||
-          item.proName ||
-          item.pro_name ||
-          (item.pro_employee ? `${item.pro_employee.first_name} ${item.pro_employee.last_name}` : "") ||
-          "",
-        proId: item.proId || item.pro_id || "",
-        dgmName:
-          item.dgm ||
-          item.dgmName ||
-          item.dgm_name ||
-          (item.dgm_employee ? `${item.dgm_employee.first_name} ${item.dgm_employee.last_name}` : "") ||
-          "",
-        dgmEmpId: item.dgmEmpId || item.dgm_emp_id || "",
-        status: reverseStatusMap[(item.status || "").toLowerCase()] || item.status?.toUpperCase() || "UNKNOWN",
-        statusId: item.statusId || item.status_id || "",
-        reason: item.reason || "",
-      };
-     
-      console.log("🚀 Navigating with initialValues:", initialValues);
-     
-      navigate(`/scopes/application/status/${applicationNo}/${route}`, {
-        state: {
-          initialValues: initialValues,
-        },
-      });
-    }
-  };
  
   if (loading) return <div>Loading applications...</div>;
   if (error) return <div>{error}</div>;
@@ -388,86 +62,30 @@ const ApplicationStatus = () => {
           Access and manage comprehensive student details seamlessly. View
           personalized profiles tailored to your campus.
         </p>
-        <div className={styles["application-status__actions"]}>
-          <div className={styles["application-status__search"]}>
-            <figure className={styles["application-status__search-icon"]}>
-              <img src={searchIcon} alt="Search" />
-            </figure>
-            <input
-              type="text"
-              placeholder="Search with application no"
-              value={search}
-              onChange={(e) => setSearch(e.target.value.trim())}
-            />
-          </div>
-          {!search && (
-            <div className={styles["application-status__filter"]}>
-              <button
-                className={styles["application-status__filter-btn"]}
-                onClick={() => setShowFilter((prev) => !prev)}
-              >
-                <span className={styles["application-status__filter-icon-wrapper"]}>
-                  <img
-                    src={isFilterApplied ? appliedFilterIcon : filterIcon}
-                    alt="Filter"
-                  />
-                  {isFilterApplied && (
-                    <span className={styles["application-status__filter-dot"]}></span>
-                  )}
-                </span>
-                Filter
-              </button>
-              {showFilter && (
-                <FilterPanel
-                  activeTab={activeTab}
-                  setActiveTab={setActiveTab}
-                  selectedCampus={selectedCampus}
-                  setSelectedCampus={setSelectedCampus}
-                  studentCategory={studentCategory}
-                  setStudentCategory={setStudentCategory}
-                />
-              )}
-            </div>
-          )}
-          {!search && (
-            <div className={styles["application-status__export"]}>
-              <button
-                className={styles["application-status__export-btn"]}
-                onClick={() => setShowExport((prev) => !prev)}
-              >
-                <img src={exportIcon} alt="Export" /> Export
-              </button>
-              {showExport && (
-                <FileExport onExport={(type) => console.log("Export:", type)} />
-              )}
-            </div>
-          )}
-        </div>
+        
+        <ApplicationStatusHeader
+          search={search}
+          handleSearchChange={handleSearchChange}
+          showFilter={showFilter}
+          setShowFilter={setShowFilter}
+          showExport={showExport}
+          setShowExport={setShowExport}
+          isFilterApplied={isFilterApplied}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          selectedCampus={selectedCampus}
+          setSelectedCampus={setSelectedCampus}
+          studentCategory={studentCategory}
+          setStudentCategory={setStudentCategory}
+        />
      
-        {search ? (
-          filteredData.length === 0 ? (
-            <p className={styles["application-status__no-results"]}>
-              No results found for "{search}"
-            </p>
-          ) : (
-            <SearchCards
-              data={filteredData}
-              maxResults={5}
-              onCardClick={handleCardClick}
-            />
-          )
-        ) : filteredData.length === 0 ? (
-          <p className={styles["application-status__no-results"]}>
-            No results found
-          </p>
-        ) : (
-          <ApplicationStatusTable
-            filteredData={filteredData}
-            setData={setData}
-            pageIndex={pageIndex}
-            setPageIndex={setPageIndex}
-          />
-        )}
+        <ApplicationStatusContent
+          search={search}
+          filteredData={filteredData}
+          pageIndex={pageIndex}
+          setPageIndex={setPageIndex}
+          handleCardClick={handleCardClick}
+        />
       </div>
     </div>
   );

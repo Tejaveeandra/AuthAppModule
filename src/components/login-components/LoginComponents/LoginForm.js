@@ -85,6 +85,43 @@ const LoginForm = () => {
         if (resp?.role) localStorage.setItem("designation", resp.role); // Store role as designation
         if (resp?.empRole) localStorage.setItem("designation", resp.empRole); // Store empRole as designation
         
+        // ========================================
+        // PROJECT-WIDE STATUS CONTROL BASED ON BACKEND LOGIN
+        // ========================================
+        // Determine user type from backend response or hardcode for now
+        // In future, this will come from backend database
+        let userType = "school"; // Default hardcoded value
+        
+        // Check if backend provides user type (for future implementation)
+        if (resp?.userType) {
+          userType = resp.userType; // Use backend value when available
+        } else if (resp?.institutionType) {
+          userType = resp.institutionType; // Alternative backend field
+        } else if (resp?.type) {
+          userType = resp.type; // Another alternative backend field
+        }
+        // For now, hardcode based on your needs:
+        // userType = "college"; // Uncomment for college users
+        // userType = "school";   // Uncomment for school users
+        
+        if (userType === "college") {
+          // Set all college-related flags
+          localStorage.setItem("applicationType", "college");
+          localStorage.setItem("userStatus", "college");
+          localStorage.setItem("projectMode", "college");
+          localStorage.setItem("institutionType", "college");
+          localStorage.setItem("userType", "college");
+          console.log("🎓 [PROJECT MODE] Set to COLLEGE - Entire project is now college-focused");
+        } else if (userType === "school") {
+          // Set all school-related flags
+          localStorage.setItem("applicationType", "school");
+          localStorage.setItem("userStatus", "school");
+          localStorage.setItem("projectMode", "school");
+          localStorage.setItem("institutionType", "school");
+          localStorage.setItem("userType", "school");
+          console.log("🏫 [PROJECT MODE] Set to SCHOOL - Entire project is now school-focused");
+        }
+        
         console.log("[Login] navigating to /scopes");
         navigate("/scopes");
         return;

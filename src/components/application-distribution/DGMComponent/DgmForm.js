@@ -42,7 +42,6 @@ const DgmForm = ({ initialValues = {}, onSubmit, setIsInsertClicked, isUpdate=fa
     // issuedToId: initialValues?.issuedToId ?? null,
   });
 
-  console.log("selectedAcademicYearId:", selectedAcademicYearId);
 
   const didSeedRef = useRef({ year: false, state: false });
 
@@ -60,7 +59,6 @@ const DgmForm = ({ initialValues = {}, onSubmit, setIsInsertClicked, isUpdate=fa
     error,
     isLoading,
   } = useGetAppNumberRange(selectedAcademicYearId, 4079);
-  console.log("Fetched App Number Range:", appNumberRange);
 
   // Normalize arrays
   const yearsData = useMemo(() => asArray(yearsRaw), [yearsRaw]);
@@ -134,9 +132,7 @@ const DgmForm = ({ initialValues = {}, onSubmit, setIsInsertClicked, isUpdate=fa
     if(isUpdate) return;
     if (appNumberRange && appNumberRange.length > 0) {
       const { id, appFrom, appTo } = appNumberRange[0]; // Extract from first item
-      console.log("Application From To: ", { appFrom, appTo });
       setSeedInitialValues((prevValues) => {
-        console.log("Previous seedInitialValues:", prevValues);
         return {
           ...prevValues,
           availableAppNoFrom: String(appFrom),
@@ -210,7 +206,6 @@ const DgmForm = ({ initialValues = {}, onSubmit, setIsInsertClicked, isUpdate=fa
     obj.issuedToEmpId = Number(issuedToId);  // Changed: Use issuedToEmpId to match BackendPatcher and validation
     obj.issuedToId = Number(issuedToId);     // Added: For compatibility with dgmFormDTO
   }
-  console.log("Computed backendValues:", obj); // For debugging
     return obj;
   }, [
     mobileNo,

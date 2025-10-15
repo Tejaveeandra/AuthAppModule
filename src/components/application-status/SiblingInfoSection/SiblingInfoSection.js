@@ -44,7 +44,8 @@ const SiblingInfoSection = ({
   // Local validation function for sibling fields
   const validateSiblingField = async (fieldName, value) => {
     try {
-      await siblingValidationSchema.validateAt(fieldName, { siblingInformation: values.siblingInformation });
+      const siblingData = Array.isArray(values.siblingInformation) ? values.siblingInformation : [];
+      await siblingValidationSchema.validateAt(fieldName, { siblingInformation: siblingData });
       // Clear error if validation passes
       setLocalErrors(prev => {
         const newErrors = { ...prev };
@@ -88,7 +89,7 @@ const SiblingInfoSection = ({
                   <div className={styles.Sibling_Info_Section_general_line}></div>
                 </div>
                 <div>
-                  {values.siblingInformation && values.siblingInformation.length > 0 ? (
+                  {Array.isArray(values.siblingInformation) && values.siblingInformation.length > 0 ? (
                     values.siblingInformation.map((sibling, i) => (
                       <div key={i} className={styles.siblingBox}>
                         <div className={styles.siblingHeader}>
@@ -147,10 +148,10 @@ const SiblingInfoSection = ({
                           <Dropdown
                             dropdownname="Relation Type"
                             name={`siblingInformation.${i}.relationType`}
-                            results={dropdownOptions.relationTypes
+                            results={(dropdownOptions.relationTypes || [])
                               .filter((opt) => !['Father', 'Mother', 'Guardian'].includes(opt.label))
                               .map((opt) => opt.label)}
-                            value={dropdownOptions.relationTypes.find((opt) => opt.id === sibling.relationType)?.label || ""}
+                            value={(dropdownOptions.relationTypes || []).find((opt) => opt.id === sibling.relationType)?.label || ""}
                             onChange={(e) => {
                               const selectedLabel = e.target.value;
                               const selectedOption = dropdownOptions.relationTypes.find((opt) => opt.label === selectedLabel);
@@ -170,8 +171,8 @@ const SiblingInfoSection = ({
                           <Dropdown
                             dropdownname="Select Class"
                             name={`siblingInformation.${i}.class`}
-                            results={dropdownOptions.allStudentClasses.map((opt) => opt.label)}
-                            value={dropdownOptions.allStudentClasses.find((opt) => opt.id === sibling.class)?.label || ""}
+                            results={(dropdownOptions.allStudentClasses || []).map((opt) => opt.label)}
+                            value={(dropdownOptions.allStudentClasses || []).find((opt) => opt.id === sibling.class)?.label || ""}
                             onChange={(e) => {
                               const selectedLabel = e.target.value;
                               const selectedOption = dropdownOptions.allStudentClasses.find((opt) => opt.label === selectedLabel);
@@ -191,8 +192,8 @@ const SiblingInfoSection = ({
                           <Dropdown
                             dropdownname="Gender"
                             name={`siblingInformation.${i}.gender`}
-                            results={dropdownOptions.genders.map((opt) => opt.label)}
-                            value={dropdownOptions.genders.find((opt) => opt.id === sibling.gender)?.label || ""}
+                            results={(dropdownOptions.genders || []).map((opt) => opt.label)}
+                            value={(dropdownOptions.genders || []).find((opt) => opt.id === sibling.gender)?.label || ""}
                             onChange={(e) => {
                               const selectedLabel = e.target.value;
                               const selectedOption = dropdownOptions.genders.find((opt) => opt.label === selectedLabel);
@@ -241,6 +242,10 @@ const SiblingInfoSection = ({
                       righticon={<Add />}
                       className={styles.addSiblingBtn}
                       onClick={() => {
+                        // Ensure siblingInformation array is initialized
+                        if (!Array.isArray(values.siblingInformation)) {
+                          setFieldValue("siblingInformation", []);
+                        }
                         push({
                           fullName: "",
                           relationType: "",
@@ -317,6 +322,10 @@ const SiblingInfoSection = ({
                     width={"100%"}
                     className={styles.addSiblingBtn}
                     onClick={() => {
+                      // Ensure siblingInformation array is initialized
+                      if (!Array.isArray(values.siblingInformation)) {
+                        setFieldValue("siblingInformation", []);
+                      }
                       push({
                         fullName: "",
                         relationType: "",

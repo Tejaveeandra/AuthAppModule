@@ -5,7 +5,7 @@ import ApplicationSearchContainer from "../application-analytics-containers/appl
 import ApplicationNavLinksContainer from "../application-analytics-containers/application-nav-links-container/ApplicationNavLinksContainer";
 import DistributeTab from "../../components/application-distribution/DistributeTab";
 import ApplicationStatus from "../../components/application-status/ApplicationComponent/ApplicationStatus/ApplicationStatus";
-import ApplicationStatusForm from "../../components/application-status/ApplicationComponent/ApplicationStatusForm/AppplicationStatusForm";
+import ApplicationStatusFormRefactored from "../../components/application-status/ApplicationComponent/ApplicationStatusForm/ApplicationStatusFormRefactored";
 
 const ApplicationModuleContainer = () => {
   const location = useLocation();
@@ -34,7 +34,7 @@ const ApplicationModuleContainer = () => {
           <Route path="status" element={<ApplicationStatus />} />
           <Route
             path="status/:applicationNo/:status?"
-            element={<ApplicationStatusForm />}
+            element={<ApplicationStatusFormRefactored />}
           />
         </Routes>
       </div>

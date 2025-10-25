@@ -95,23 +95,29 @@ const FormField = ({
         }
         onChange={(e) => {
           const selectedValue = e.target.value;
+          console.log(`FormField onChange - Field: ${field.name}, Value: ${selectedValue}`);
           setFieldValue(field.name, selectedValue);
 
           // Handle field-specific logic
           switch (field.name) {
             case "zoneName":
+              console.log("Calling onZoneChange with:", selectedValue);
               onZoneChange(selectedValue);
               break;
             case "campusName":
+              console.log("Calling onCampusChange with:", selectedValue);
               onCampusChange(selectedValue);
               break;
             case "proName":
+              console.log("Calling onProChange with:", selectedValue);
               onProChange(selectedValue);
               break;
             case "dgmName":
+              console.log("Calling onDgmChange with:", selectedValue);
               onDgmChange(selectedValue);
               break;
             case "status":
+              console.log("Calling onStatusChange with:", selectedValue);
               onStatusChange(selectedValue);
               break;
             default:

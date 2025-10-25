@@ -52,3 +52,19 @@ figure{
   box-sizing: border-box;
 }
 
+/* Global scrollbar hiding - hide scrollbars everywhere but keep scrolling functionality */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* WebKit browsers (Chrome, Safari, Edge) */
+}
+
+/* Ensure scrolling still works */
+html, body {
+  overflow-x: hidden; /* Hide horizontal scrollbar */
+  overflow-y: auto; /* Keep vertical scrolling */
+}
+

@@ -23,7 +23,10 @@ export const normalizeString = (str) =>
  */
 export const findIdByLabel = (options, label, fieldName) => {
   if (!Array.isArray(options) || !options.length || !label) {
-    console.warn(`No valid label or options for ${fieldName}:`, { label, options });
+    // Only log warning if we actually have a label but no options
+    if (label && (!Array.isArray(options) || !options.length)) {
+      console.warn(`No valid options for ${fieldName}:`, { label, options });
+    }
     return null;
   }
   
@@ -85,16 +88,53 @@ export const mapToDropdownOptions = (data, labelField, valueField, fallbackLabel
  * @param {Object} dropdownOptions - Available dropdown options
  * @returns {Object} Validation result with isValid and missingIds
  */
+// Global storage for backend IDs
+let storedBackendIds = null;
+
+export const storeBackendIds = (ids) => {
+  console.log("=== STORING BACKEND IDS ===");
+  console.log("Storing IDs:", ids);
+  storedBackendIds = ids;
+  console.log("Stored IDs:", storedBackendIds);
+  console.log("=== END STORING BACKEND IDS ===");
+};
+
+export const getStoredBackendIds = () => {
+  console.log("=== GETTING STORED BACKEND IDS ===");
+  console.log("Retrieved IDs:", storedBackendIds);
+  console.log("=== END GETTING STORED BACKEND IDS ===");
+  return storedBackendIds;
+};
+
 export const validateSubmissionData = (values, dropdownOptions) => {
+  console.log("=== FORM SUBMISSION VALIDATION DEBUG ===");
+  console.log("Form values:", values);
+  console.log("Form values keys:", Object.keys(values));
+  console.log("Form values with IDs:", {
+    zoneId: values.zoneId,
+    campusId: values.campusId,
+    proId: values.proId,
+    dgmEmpId: values.dgmEmpId,
+    statusId: values.statusId
+  });
+  console.log("Dropdown options:", dropdownOptions);
+  
+  // Get the stored backend IDs
+  const backendIds = getStoredBackendIds();
+  console.log("Using stored backend IDs:", backendIds);
+  
+  // Use stored backend IDs if available, otherwise fall back to form values
   const updatedValues = {
     applicationNo: parseInt(values.applicationNo, 10) || 0,
-    statusId: findIdByLabel(dropdownOptions.status, values.status, "status") || null,
+    statusId: backendIds?.statusId || values.statusId || null,
     reason: values.reason,
-    campusId: findIdByLabel(dropdownOptions.campusName, values.campusName, "campusName") || null,
-    proId: findIdByLabel(dropdownOptions.proName, values.proName, "proName") || null,
-    zoneId: findIdByLabel(dropdownOptions.zoneName, values.zoneName, "zoneName") || null,
-    dgmEmpId: findIdByLabel(dropdownOptions.dgmName, values.dgmName, "dgmName") || null,
+    campusId: backendIds?.campusId || values.campusId || null,
+    proId: backendIds?.proId || values.proId || null,
+    zoneId: backendIds?.zoneId || values.zoneId || null,
+    dgmEmpId: backendIds?.dgmEmpId || values.dgmEmpId || null,
   };
+
+  console.log("Updated values for submission:", updatedValues);
 
   const missingIds = [];
   if (!updatedValues.statusId || isNaN(updatedValues.statusId)) missingIds.push("statusId");
@@ -102,6 +142,14 @@ export const validateSubmissionData = (values, dropdownOptions) => {
   if (!updatedValues.proId) missingIds.push("proId");
   if (!updatedValues.zoneId || isNaN(updatedValues.zoneId)) missingIds.push("zoneId");
   if (!updatedValues.dgmEmpId) missingIds.push("dgmEmpId");
+
+  console.log("Missing IDs:", missingIds);
+  console.log("Validation result:", {
+    isValid: missingIds.length === 0,
+    missingIds,
+    updatedValues,
+  });
+  console.log("=== END FORM SUBMISSION VALIDATION DEBUG ===");
 
   return {
     isValid: missingIds.length === 0,

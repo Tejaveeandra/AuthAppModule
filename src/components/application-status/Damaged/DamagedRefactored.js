@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import Button from "../../../widgets/Button/Button";
+import ProgressHeader from "../../../widgets/ProgressHeader/ProgressHeader";
 import { ReactComponent as TrendingUpIcon } from "../../../assets/application-status/Trending up.svg";
 import styles from "./Damaged.module.css";
 
@@ -46,6 +47,14 @@ const DamagedRefactored = () => {
     fetchProEmployees,
     setError,
   } = useDropdownData();
+
+  // Debug dropdown options
+  console.log("Current dropdown options:", dropdownOptions);
+  console.log("Campus options specifically:", dropdownOptions.campusName);
+  console.log("Zone options specifically:", dropdownOptions.zoneName);
+  console.log("First few zone options:", dropdownOptions.zoneName.slice(0, 3));
+  console.log("All zone options expanded:", dropdownOptions.zoneName);
+  console.log("Zone options structure:", dropdownOptions.zoneName.map(zone => ({ label: zone.label, value: zone.value })));
 
   const {
     showSuccess,
@@ -104,12 +113,20 @@ const DamagedRefactored = () => {
 
   // Event handlers
   const handleZoneChange = useCallback(async (zoneName, setFieldValue) => {
+    console.log("handleZoneChange called with zoneName:", zoneName);
+    console.log("Available zone options:", dropdownOptions.zoneName);
+    
     const zoneIdLocal = findIdByLabel(dropdownOptions.zoneName, zoneName, "zoneName");
+    console.log("Found zoneId:", zoneIdLocal);
+    
     if (zoneIdLocal) {
       setZoneId(zoneIdLocal);
       setFieldValue("zoneId", zoneIdLocal);
+      console.log("Calling fetchCampuses with zoneId:", zoneIdLocal);
       await fetchCampuses(zoneIdLocal);
       await fetchDgmEmployees(zoneIdLocal);
+    } else {
+      console.log("No zoneId found for zoneName:", zoneName);
     }
   }, [dropdownOptions.zoneName, fetchCampuses, fetchDgmEmployees]);
 
@@ -178,6 +195,12 @@ const DamagedRefactored = () => {
 
   return (
     <div className={styles.Damaged_damaged_Page_Wrapper}>
+      {/* Application Damage Header - Always visible */}
+      <div className={styles.Damaged_Header_Wrapper}>
+        <h1 className={styles.Damaged_Header_Title}>Application Damage</h1>
+        <ProgressHeader step={0} totalSteps={2} />
+      </div>
+      
       <Formik 
         initialValues={initialValues} 
         validationSchema={validationSchema} 
@@ -191,6 +214,7 @@ const DamagedRefactored = () => {
 
           return (
             <Form className={styles.Damaged_damaged_Form_Wrapper}>
+              
               <ApplicationDetailsFetcher
                 applicationNo={applicationNo}
                 isOptionsLoaded={isOptionsLoaded}

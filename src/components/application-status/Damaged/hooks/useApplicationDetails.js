@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useFormikContext } from "formik";
 import { fetchApplicationDetails } from "../../../../queries/application-status/apis";
-import { findIdByLabel, reverseStatusMap } from "../utils/formUtils";
+import { findIdByLabel, reverseStatusMap, storeBackendIds } from "../utils/formUtils";
 
 /**
  * Custom hook for fetching and managing application details
@@ -24,6 +24,14 @@ export const useApplicationDetails = ({
         try {
           const data = await fetchApplicationDetails(applicationNo);
 
+          // Display the full backend object
+          console.log("=== FULL BACKEND DATA OBJECT ===");
+          console.log("Complete backend response:", data);
+          console.log("Backend data type:", typeof data);
+          console.log("Backend data keys:", data ? Object.keys(data) : "No data");
+          console.log("Backend data structure:", JSON.stringify(data, null, 2));
+          console.log("=== END FULL BACKEND DATA OBJECT ===");
+
           // Map API response to form fields, handling status mapping
           setFieldValue("zoneName", data.zoneName || "");
           setFieldValue("campusName", data.campusName || "");
@@ -42,18 +50,89 @@ export const useApplicationDetails = ({
             setPendingDgmName(data.dgmEmpName);
           }
 
-          // Set IDs based on labels
-          const zoneId = findIdByLabel(dropdownOptions.zoneName, data.zoneName, "zoneName");
-          const campusId = findIdByLabel(dropdownOptions.campusName, data.campusName, "campusName");
-          const proId = findIdByLabel(dropdownOptions.proName, data.proName, "proName");
-          const dgmId = findIdByLabel(dropdownOptions.dgmName, data.dgmEmpName, "dgmName");
-          const statusId = findIdByLabel(dropdownOptions.status, mappedStatus, "status");
+          // Use IDs directly from backend data - no need to lookup
+          const zoneId = data.zoneId || null;
+          const campusId = data.campusId || null;
+          const proId = data.proId || null;
+          const dgmId = data.dgmEmpId || null;
+          const statusId = data.statusId || null;
 
-          setFieldValue("zoneId", zoneId || "");
-          setFieldValue("campusId", campusId || "");
-          setFieldValue("proId", proId || "");
-          setFieldValue("dgmEmpId", dgmId || "");
-          setFieldValue("statusId", statusId || "");
+          console.log("=== SETTING FORM VALUES FROM BACKEND DATA ===");
+          console.log("Backend data IDs:", {
+            zoneId: data.zoneId,
+            campusId: data.campusId,
+            proId: data.proId,
+            dgmEmpId: data.dgmEmpId,
+            statusId: data.statusId
+          });
+          console.log("Setting form values:", {
+            zoneId,
+            campusId,
+            proId,
+            dgmId,
+            statusId
+          });
+          console.log("=== END SETTING FORM VALUES ===");
+
+          // Store backend IDs for later use in form submission
+          storeBackendIds({
+            zoneId: zoneId,
+            campusId: campusId,
+            proId: proId,
+            dgmEmpId: dgmId,
+            statusId: statusId
+          });
+
+          // Set the IDs in the form - force set with actual values
+          console.log("Setting form field values:", {
+            zoneId: zoneId,
+            campusId: campusId,
+            proId: proId,
+            dgmEmpId: dgmId,
+            statusId: statusId
+          });
+
+          setFieldValue("zoneId", zoneId);
+          setFieldValue("campusId", campusId);
+          setFieldValue("proId", proId);
+          setFieldValue("dgmEmpId", dgmId);
+          setFieldValue("statusId", statusId);
+
+          // Force set the values again after a short delay to ensure they stick
+          setTimeout(() => {
+            console.log("=== FORCE SETTING FORM VALUES AGAIN ===");
+            setFieldValue("zoneId", zoneId);
+            setFieldValue("campusId", campusId);
+            setFieldValue("proId", proId);
+            setFieldValue("dgmEmpId", dgmId);
+            setFieldValue("statusId", statusId);
+            console.log("Force set values:", {
+              zoneId: zoneId,
+              campusId: campusId,
+              proId: proId,
+              dgmEmpId: dgmId,
+              statusId: statusId
+            });
+            console.log("=== END FORCE SETTING ===");
+          }, 200);
+
+          // Additional verification - try setting values with different approaches
+          setTimeout(() => {
+            console.log("=== ADDITIONAL VERIFICATION ===");
+            console.log("Trying to set values with different field names...");
+            
+            // Try alternative field names if they exist
+            setFieldValue("campusId", campusId);
+            setFieldValue("proId", proId);
+            setFieldValue("dgmEmpId", dgmId);
+            
+            // Also try setting as numbers explicitly
+            if (campusId) setFieldValue("campusId", parseInt(campusId));
+            if (proId) setFieldValue("proId", parseInt(proId));
+            if (dgmId) setFieldValue("dgmEmpId", parseInt(dgmId));
+            
+            console.log("=== END ADDITIONAL VERIFICATION ===");
+          }, 500);
 
           setZoneId(zoneId || "");
           setSelectedCampusId(campusId || "");

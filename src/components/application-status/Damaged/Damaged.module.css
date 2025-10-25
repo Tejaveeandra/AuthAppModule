@@ -4,6 +4,8 @@
   align-items: center;
   margin-top: 20px;
   width: 100%;
+  background-color: #fff;
+  padding: 20px;
 }
 
 .Damaged_damaged_Form_Wrapper {
@@ -119,3 +121,27 @@
   90% { opacity: 1; }
   100% { opacity: 0; transform: translateY(20px); }
 } */
+
+/* Application Damage Header Styles */
+.Damaged_Header_Wrapper {
+  width: 100%;
+  margin-bottom: 10px;
+
+  
+}
+
+.Damaged_Header_Title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 15px 0;
+  text-align: left;
+}
+
+/* Success Page Full Width */
+.Damaged_Success_Page_Wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}

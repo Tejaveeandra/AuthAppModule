@@ -60,6 +60,37 @@ const LoginForm = () => {
       // --- success path ---
       if (resp && (resp.isLoginSuccess || resp.loginSuccess)) {
         console.log("[Login] success branch hit");
+        
+        // === COMPLETE BACKEND RESPONSE DEBUG ===
+        console.log("=== COMPLETE BACKEND LOGIN RESPONSE ===");
+        console.log("Full backend response object:", resp);
+        console.log("Backend response type:", typeof resp);
+        console.log("Backend response keys:", Object.keys(resp));
+        console.log("Backend response structure:", JSON.stringify(resp, null, 2));
+        console.log("=== END COMPLETE BACKEND RESPONSE ===");
+        
+        // === EMPLOYEE DETAILS DEBUG ===
+        console.log("=== EMPLOYEE DETAILS FROM BACKEND ===");
+        console.log("Employee Name:", resp?.empName);
+        console.log("Employee ID:", resp?.empId);
+        console.log("Designation:", resp?.designation);
+        console.log("Role:", resp?.role);
+        console.log("Employee Role:", resp?.empRole);
+        console.log("User Type:", resp?.userType);
+        console.log("Institution Type:", resp?.institutionType);
+        console.log("Type:", resp?.type);
+        console.log("All employee fields:", {
+          empName: resp?.empName,
+          empId: resp?.empId,
+          designation: resp?.designation,
+          role: resp?.role,
+          empRole: resp?.empRole,
+          userType: resp?.userType,
+          institutionType: resp?.institutionType,
+          type: resp?.type
+        });
+        console.log("=== END EMPLOYEE DETAILS ===");
+        
         const accessToken = resp?.jwt?.accessToken;
         const exp = resp?.jwt?.expiresAtEpochSeconds;
         const type = resp?.jwt?.tokenType;
@@ -78,49 +109,41 @@ const LoginForm = () => {
           console.warn("[Login] jwt.accessToken missing in response");
         }
  
-        if (resp?.empName) localStorage.setItem("empName", resp.empName);
-        if (resp?.empId != null)
+        // === STORING EMPLOYEE DATA IN LOCALSTORAGE ===
+        console.log("=== STORING EMPLOYEE DATA IN LOCALSTORAGE ===");
+        
+        if (resp?.empName) {
+          localStorage.setItem("empName", resp.empName);
+          console.log("Stored empName:", resp.empName);
+        }
+        if (resp?.empId != null) {
           localStorage.setItem("empId", String(resp.empId));
-        if (resp?.designation) localStorage.setItem("designation", resp.designation);
-        if (resp?.role) localStorage.setItem("designation", resp.role); // Store role as designation
-        if (resp?.empRole) localStorage.setItem("designation", resp.empRole); // Store empRole as designation
-        
-        // ========================================
-        // PROJECT-WIDE STATUS CONTROL BASED ON BACKEND LOGIN
-        // ========================================
-        // Determine user type from backend response or hardcode for now
-        // In future, this will come from backend database
-        let userType = "school"; // Default hardcoded value
-        
-        // Check if backend provides user type (for future implementation)
-        if (resp?.userType) {
-          userType = resp.userType; // Use backend value when available
-        } else if (resp?.institutionType) {
-          userType = resp.institutionType; // Alternative backend field
-        } else if (resp?.type) {
-          userType = resp.type; // Another alternative backend field
+          console.log("Stored empId:", resp.empId);
         }
-        // For now, hardcode based on your needs:
-        // userType = "college"; // Uncomment for college users
-        // userType = "school";   // Uncomment for school users
-        
-        if (userType === "college") {
-          // Set all college-related flags
-          localStorage.setItem("applicationType", "college");
-          localStorage.setItem("userStatus", "college");
-          localStorage.setItem("projectMode", "college");
-          localStorage.setItem("institutionType", "college");
-          localStorage.setItem("userType", "college");
-          console.log("🎓 [PROJECT MODE] Set to COLLEGE - Entire project is now college-focused");
-        } else if (userType === "school") {
-          // Set all school-related flags
-          localStorage.setItem("applicationType", "school");
-          localStorage.setItem("userStatus", "school");
-          localStorage.setItem("projectMode", "school");
-          localStorage.setItem("institutionType", "school");
-          localStorage.setItem("userType", "school");
-          console.log("🏫 [PROJECT MODE] Set to SCHOOL - Entire project is now school-focused");
+        if (resp?.designation) {
+          localStorage.setItem("designation", resp.designation);
+          console.log("Stored designation:", resp.designation);
         }
+        if (resp?.role) {
+          localStorage.setItem("designation", resp.role); // Store role as designation
+          console.log("Stored role as designation:", resp.role);
+        }
+        if (resp?.empRole) {
+          localStorage.setItem("designation", resp.empRole); // Store empRole as designation
+          console.log("Stored empRole as designation:", resp.empRole);
+        }
+        if (resp?.category) {
+          localStorage.setItem("category", resp.category);
+          console.log("Stored category:", resp.category);
+        } else {
+          console.log("Category not found in response:", resp?.category);
+        }
+        if (resp?.campusName) {
+          localStorage.setItem("campusName", resp.campusName);
+          console.log("Stored campusName:", resp.campusName);
+        }
+        
+        console.log("=== END STORING EMPLOYEE DATA ===");
         
         console.log("[Login] navigating to /scopes");
         navigate("/scopes");

@@ -347,15 +347,39 @@ export const getCampusesByZoneId = async (zoneId) => {
 // src/Bakend/apiService.js
 export const fetchApplicationDetails = async (applicationNo) => {
   try {
+    console.log("=== FETCH APPLICATION DETAILS DEBUG ===");
+    console.log("Fetching application details for applicationNo:", applicationNo);
+    console.log("API URL:", `http://localhost:8080/api/applications/details/${applicationNo}`);
+    
     const response = await fetch(
       `http://localhost:8080/api/applications/details/${applicationNo}`
     );
+    
+    console.log("Response status:", response.status);
+    console.log("Response ok:", response.ok);
+    console.log("Response headers:", response.headers);
+    
     if (!response.ok) {
+      console.log("Response not ok, status:", response.status);
       throw new Error("Failed to fetch application details");
     }
-    return await response.json();
+    
+    const data = await response.json();
+    console.log("=== APPLICATION DETAILS DATA ===");
+    console.log("Raw application details data:", data);
+    console.log("Data type:", typeof data);
+    console.log("Data keys:", data ? Object.keys(data) : "No data");
+    console.log("Data structure:", JSON.stringify(data, null, 2));
+    console.log("=== END APPLICATION DETAILS DATA ===");
+    
+    return data;
   } catch (err) {
     console.error("Failed to fetch application details:", err);
+    console.log("Error details:", {
+      message: err.message,
+      stack: err.stack,
+      name: err.name
+    });
     throw err;
   }
 };

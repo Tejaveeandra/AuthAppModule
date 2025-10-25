@@ -33,60 +33,114 @@ const processApiResponse = (responseData, apiName) => {
 // API calls for dropdowns (aligned with backend endpoints)
 export const fetchAdmissionTypes = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/admission-types`);
-    console.log("Admission types API response:", response.data);
+    console.log("🔍 === FETCHING ADMISSION TYPES API ===");
+    console.log("🔍 API URL:", `${API_BASE_URL}/admission-types`);
+    
+    const response = await fetch(`${API_BASE_URL}/admission-types`);
+    console.log("🔍 Admission types API response status:", response.status);
+    console.log("🔍 Admission types API response ok:", response.ok);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("🔍 Admission types API response data:", data);
+    console.log("🔍 Response data type:", typeof data);
+    console.log("🔍 Is response data array:", Array.isArray(data));
+    console.log("🔍 Response data length:", data?.length);
    
     // Handle nested API response structure
-    let actualData = response.data;
-    if (Array.isArray(response.data) && response.data.length === 2 && response.data[0] === "java.util.ArrayList") {
-      actualData = response.data[1];
-    } else if (Array.isArray(response.data) && response.data.length > 0 && typeof response.data[0] === "string") {
-      actualData = response.data[1] || response.data;
+    let actualData = data;
+    if (Array.isArray(data) && data.length === 2 && data[0] === "java.util.ArrayList") {
+      actualData = data[1];
+      console.log("🔍 Detected nested ArrayList structure, using index 1");
+    } else if (Array.isArray(data) && data.length > 0 && typeof data[0] === "string") {
+      actualData = data[1] || data;
+      console.log("🔍 Detected string array structure, using index 1 or fallback");
     }
    
-    console.log("Processed admission types data:", actualData);
+    console.log("🔍 Processed admission types data:", actualData);
+    console.log("🔍 === END ADMISSION TYPES API ===");
     return actualData;
   } catch (error) {
+    console.error("❌ Error fetching admission types:", error);
     handleApiError(error);
   }
 };
 
 export const fetchStudentTypes = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/student-types`);
-    console.log("Student types API response:", response.data);
+    console.log("🔍 === FETCHING STUDENT TYPES API ===");
+    console.log("🔍 API URL:", `${API_BASE_URL}/student-types`);
+    
+    const response = await fetch(`${API_BASE_URL}/student-types`);
+    console.log("🔍 Student types API response status:", response.status);
+    console.log("🔍 Student types API response ok:", response.ok);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("🔍 Student types API response data:", data);
+    console.log("🔍 Response data type:", typeof data);
+    console.log("🔍 Is response data array:", Array.isArray(data));
+    console.log("🔍 Response data length:", data?.length);
    
     // Handle nested API response structure
-    let actualData = response.data;
-    if (Array.isArray(response.data) && response.data.length === 2 && response.data[0] === "java.util.ArrayList") {
-      actualData = response.data[1];
-    } else if (Array.isArray(response.data) && response.data.length > 0 && typeof response.data[0] === "string") {
-      actualData = response.data[1] || response.data;
+    let actualData = data;
+    if (Array.isArray(data) && data.length === 2 && data[0] === "java.util.ArrayList") {
+      actualData = data[1];
+      console.log("🔍 Detected nested ArrayList structure, using index 1");
+    } else if (Array.isArray(data) && data.length > 0 && typeof data[0] === "string") {
+      actualData = data[1] || data;
+      console.log("🔍 Detected string array structure, using index 1 or fallback");
     }
    
-    console.log("Processed student types data:", actualData);
+    console.log("🔍 Processed student types data:", actualData);
+    console.log("🔍 === END STUDENT TYPES API ===");
     return actualData;
   } catch (error) {
+    console.error("❌ Error fetching student types:", error);
     handleApiError(error);
   }
 };
 
 export const fetchGenders = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/genders`);
-    console.log("Genders API response:", response.data);
+    console.log("🔍 === FETCHING GENDERS API ===");
+    console.log("🔍 API URL:", `${API_BASE_URL}/genders`);
+    
+    const response = await fetch(`${API_BASE_URL}/genders`);
+    console.log("🔍 Genders API response status:", response.status);
+    console.log("🔍 Genders API response ok:", response.ok);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("🔍 Genders API response data:", data);
+    console.log("🔍 Response data type:", typeof data);
+    console.log("🔍 Is response data array:", Array.isArray(data));
+    console.log("🔍 Response data length:", data?.length);
    
     // Handle nested API response structure
-    let actualData = response.data;
-    if (Array.isArray(response.data) && response.data.length === 2 && response.data[0] === "java.util.ArrayList") {
-      actualData = response.data[1];
-    } else if (Array.isArray(response.data) && response.data.length > 0 && typeof response.data[0] === "string") {
-      actualData = response.data[1] || response.data;
+    let actualData = data;
+    if (Array.isArray(data) && data.length === 2 && data[0] === "java.util.ArrayList") {
+      actualData = data[1];
+      console.log("🔍 Detected nested ArrayList structure, using index 1");
+    } else if (Array.isArray(data) && data.length > 0 && typeof data[0] === "string") {
+      actualData = data[1] || data;
+      console.log("🔍 Detected string array structure, using index 1 or fallback");
     }
    
-    console.log("Processed genders data:", actualData);
+    console.log("🔍 Processed genders data:", actualData);
+    console.log("🔍 === END GENDERS API ===");
     return actualData;
   } catch (error) {
+    console.error("❌ Error fetching genders:", error);
     handleApiError(error);
   }
 };
@@ -430,11 +484,38 @@ export const fetchConcessionReasonAll = async () => {
 // Fetch classes by campus for GeneralInfoSection
 export const fetchClassesByCampus = async (campusId) => {
   try {
-    console.log("Fetching classes by campus from:", `${API_BASE_URL}/classes/by-campus/${campusId}`);
-    const response = await axios.get(`${API_BASE_URL}/classes/by-campus/${campusId}`);
-    return processApiResponse(response.data, "classes-by-campus");
+    console.log("🔍 === FETCHING CLASSES BY CAMPUS API ===");
+    console.log("🔍 Campus ID:", campusId);
+    console.log("🔍 API URL:", `${API_BASE_URL}/classes/by-campus/${campusId}`);
+    console.log("🔍 Full URL:", `http://localhost:8080/api/student-admissions-sale/classes/by-campus/${campusId}`);
+    
+    // Use fetch instead of axios to match the working pattern
+    const response = await fetch(`${API_BASE_URL}/classes/by-campus/${campusId}`);
+    console.log("🔍 Classes by campus API response status:", response.status);
+    console.log("🔍 Classes by campus API response ok:", response.ok);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("🔍 Classes by campus API response data:", data);
+    console.log("🔍 Response data type:", typeof data);
+    console.log("🔍 Is response data array:", Array.isArray(data));
+    console.log("🔍 Response data length:", data?.length);
+    
+    // Use the same processApiResponse logic but with fetch data
+    const processedData = processApiResponse(data, "classes-by-campus");
+    console.log("🔍 Processed classes by campus data:", processedData);
+    console.log("🔍 === END CLASSES BY CAMPUS API ===");
+    
+    return processedData;
   } catch (error) {
-    console.error("Error fetching classes by campus:", error);
+    console.error("❌ Error fetching classes by campus:", error);
+    console.error("❌ Error message:", error.message);
+    console.error("❌ Error response:", error.response);
+    console.error("❌ Error status:", error.response?.status);
+    console.error("❌ Error data:", error.response?.data);
     handleApiError(error);
   }
 };
@@ -535,22 +616,48 @@ export const fetchSchoolTypes = async () => {
 // Fetch religions for GeneralInfoSection
 export const fetchReligions = async () => {
   try {
-    console.log("Fetching religions from:", `${API_BASE_URL}/religions`);
-    const response = await axios.get(`${API_BASE_URL}/religions`);
-    console.log("Religions API response:", response.data);
+    console.log("🔍 === FETCHING RELIGIONS API ===");
+    console.log("🔍 API URL:", `${API_BASE_URL}/religions`);
+    console.log("🔍 Full URL:", `http://localhost:8080/api/student-admissions-sale/religions`);
+    
+    // Try using fetch instead of axios to match the working pattern from saleApis.js
+    const response = await fetch(`${API_BASE_URL}/religions`);
+    console.log("🔍 Religions API response status:", response.status);
+    console.log("🔍 Religions API response ok:", response.ok);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("🔍 Religions API response data:", data);
+    console.log("🔍 Response data type:", typeof data);
+    console.log("🔍 Is response data array:", Array.isArray(data));
+    console.log("🔍 Response data length:", data?.length);
    
     // Handle nested API response structure
-    let actualData = response.data;
-    if (Array.isArray(response.data) && response.data.length === 2 && response.data[0] === "java.util.ArrayList") {
-      actualData = response.data[1];
-    } else if (Array.isArray(response.data) && response.data.length > 0 && typeof response.data[0] === "string") {
-      actualData = response.data[1] || response.data;
+    let actualData = data;
+    if (Array.isArray(data) && data.length === 2 && data[0] === "java.util.ArrayList") {
+      actualData = data[1];
+      console.log("🔍 Detected nested ArrayList structure, using index 1");
+    } else if (Array.isArray(data) && data.length > 0 && typeof data[0] === "string") {
+      actualData = data[1] || data;
+      console.log("🔍 Detected string array structure, using index 1 or fallback");
     }
    
-    console.log("Processed religions data:", actualData);
+    console.log("🔍 Processed religions data:", actualData);
+    console.log("🔍 Processed data type:", typeof actualData);
+    console.log("🔍 Is processed data array:", Array.isArray(actualData));
+    console.log("🔍 Processed data length:", actualData?.length);
+    console.log("🔍 === END RELIGIONS API ===");
+    
     return actualData;
   } catch (error) {
-    console.error("Error fetching religions:", error);
+    console.error("❌ Error fetching religions:", error);
+    console.error("❌ Error message:", error.message);
+    console.error("❌ Error response:", error.response);
+    console.error("❌ Error status:", error.response?.status);
+    console.error("❌ Error data:", error.response?.data);
     handleApiError(error);
   }
 };

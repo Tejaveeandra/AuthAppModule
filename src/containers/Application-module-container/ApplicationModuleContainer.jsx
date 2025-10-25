@@ -5,19 +5,23 @@ import ApplicationSearchContainer from "../application-analytics-containers/appl
 import ApplicationNavLinksContainer from "../application-analytics-containers/application-nav-links-container/ApplicationNavLinksContainer";
 import DistributeTab from "../../components/application-distribution/DistributeTab";
 import ApplicationStatus from "../../components/application-status/ApplicationComponent/ApplicationStatus/ApplicationStatus";
-import ApplicationStatusFormRefactored from "../../components/application-status/ApplicationComponent/ApplicationStatusForm/ApplicationStatusFormRefactored";
+import SaleForm from "../../components/application-status/Sale&Conformation/SaleForm/SaleForm";
+import Damaged from "../../components/application-status/Damaged/DamagedRefactored";
 
 const ApplicationModuleContainer = () => {
   const location = useLocation();
   const isDistribute = location.pathname.includes("/distribute");
   const isStatus = location.pathname.includes("/status");
+  const isDamage = location.pathname.includes("/damage");
+  const isSaleOrConfirmation = location.pathname.match(/\/status\/[^\/]+\/(sale|confirmation)/);
 
   return (
     <div className={styles.main_content}>
-      {/* Hide search when in distribute or status */}
-      {!isDistribute && !isStatus && <ApplicationSearchContainer />}
+      {/* Hide search when in distribute, status, or damage */}
+      {!isDistribute && !isStatus && !isDamage && <ApplicationSearchContainer />}
 
-      <ApplicationNavLinksContainer />
+      {/* Hide navigation tabs when in sale or confirmation pages, but keep visible for damage */}
+      {!isSaleOrConfirmation && <ApplicationNavLinksContainer />}
 
       <div
         id="analytics_wrapper"
@@ -34,8 +38,9 @@ const ApplicationModuleContainer = () => {
           <Route path="status" element={<ApplicationStatus />} />
           <Route
             path="status/:applicationNo/:status?"
-            element={<ApplicationStatusFormRefactored />}
+            element={<SaleForm />}
           />
+          <Route path="damage" element={<Damaged />} />
         </Routes>
       </div>
     </div>
